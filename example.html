@@ -7,7 +7,7 @@
     <title id="title">精彩即将呈现...</title>
     <link rel="stylesheet" href="examp.css">
     <base target="_self">
-    <link rel="shortcut icon" href="https://gitee.com/ProgramCX/tzydhpics/raw/master/tczx.png" type="image/png">
+    <link rel="shortcut icon" href="https://s3.bmp.ovh/imgs/2023/11/14/0dd35da309410587.png" type="image/png">
 </head>
 
 <body>
@@ -16,7 +16,7 @@
     </div>
     <script src="jq.min.js"></script>
     
-    <!-- <audio src="music.m4a" id="audio" preload="none"></audio> -->
+    <audio src="http://wsaudio2bssdlbig.kugou.com/202408071214/b1230084686c00ac611aa5c2ccaded7f/bss/extname/wsaudio/17ae8e07420ea47cda91e4bdcbeff119.mp3" id="ssaudio" preload="none"></audio>
     <!-- <audio src="https://downsc.chinaz.net/Files/DownLoad/sound1/201605/7324.mp3" -->
         <!-- id="audio" preload="none"></audio>    -->
         <audio src="https://gitee.com/tzydh/tzydh/raw/main/music.m4a" id="audio" preload="none"></audio>
@@ -31,18 +31,27 @@
         </div>
         <!-- <p>若某些图片加载失败，请右键图片点击加载映像以重新加载</p> -->
         <div id="musctrl">
-            <p>🎵运动员进行曲</p>
+            <p id="topBarTitle">🎵运动员进行曲</p>
             <a onclick="if($(this).hasClass('play')){
-                    document.getElementById('audio').play();
+                    if(playss){
+                        document.getElementById('ssaudio').play();
+                    }else{
+                        document.getElementById('audio').play();
+                    }
+                    
                     played=true;
                     $('#musctrl>.btn').text('暂停');
                     $('#musctrl>.btn').removeClass('play');
                     $('#music>.tip').text('我们已开始播放音乐');
                     $('#music>.btn').remove();
                 }else{
-                    document.getElementById('audio').pause();
+                    if(playss){
+                        document.getElementById('ssaudio').pause();
+                    }else{
+                        document.getElementById('audio').pause();
+                    }
                     this.innerText='播放';
-                    $(this).addClass('play')
+                    $(this).addClass('play');
                 }" class="play a btn" style="margin: 0 15px;">播放</a>
         </div>
     </div>
@@ -102,20 +111,29 @@
         </svg>
     </a>
     <script>
+        var playss=false;
         var r = window.location.search.substr(1).match(/(^|&)id=([^&]*)(&|$)/);
         if (r != null) r = unescape(r[2])
         else {
             alert('一点小问题，不必介意，还请刷新试试');
         }
         $.getJSON(`pics/${r}.json`).then(res => {
+            //获取参数
+            if(res.title=="学校风景"){
+                //如果打开的是学校风景
+                playss=true;  
+                $('#topBarTitle').text("一路阳光（校歌）")
+            }
             $('#topic').text(res.title);
-            $('#title').text('天中运动会-' + res.title);
+            $('#title').text('天中运动会-' + res.title);    //更改标题
             if(res.intro){
+                //插入介绍
                 $('#content')[0].innerHTML += `<div class="text">
                     <p class="tit">${res.intro.tit}</p>
                     <p>${res.intro.cnt}</p>
                 </div>`;
             }
+            //插入每个图片
             res.pics.forEach(p => {
                 $('#content')[0].innerHTML += `<div class="pic af">
                     <p>加载中...</p>
@@ -134,7 +152,16 @@
         <div id="music">
             <p class="ti">奏乐~</p>
             <p class="tip">下滑即意味着我们将趁浏览器不备时播放</p>
-            <a onclick="document.getElementById('audio').play();
+
+            <!-- “默认播放”按钮 -->
+            <a onclick="
+            //如果打开的是学校风景，就播放校歌
+            if(playss){
+                document.getElementById('ssaudio').play()
+            }else{
+                document.getElementById('audio').play();
+            }
+            //改变状态为已经播放
             played=true;
             $('#musctrl>.btn').text('暂停');
             $('#musctrl>.btn').removeClass('play');
@@ -142,7 +169,11 @@
             $('#music>.btn').remove();
             localStorage.setItem('playm','true');" class="play a btn">默认播放</a>
             <a class="a btn noplay" onclick="
-            document.getElementById('audio').pause();
+            if(playss){
+                document.getElementById('ssaudio').pause()
+            }else{
+                document.getElementById('audio').pause();
+            }
             playm=false;
             $('#music>.btn').remove();
             $('#music>.tip').text('我们不会播放音乐');
